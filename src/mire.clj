@@ -12,6 +12,7 @@
 (defn cleanup []
   "Drop all inventory and remove player from room and player list."
   (dosync
+   ;; doseq поочерёдно инициализует параметр item, являющийся элементом инвентаря игрока и вызывает discard для него
    (doseq [item @*inventory*]
      (discard item))
    (commute (:inhabitants @*current-room*)
