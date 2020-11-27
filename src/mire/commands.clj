@@ -54,10 +54,13 @@
   (str "You are carrying:\n"
        (str-join "\n"  @*inventory*)))
 
+;; Если вы взяли предмет detector, то вам становится доступна команда detect, котор
 (defn detect
   "If you have the detector, you can see which room an item is in."
   [item]
   (if (@*inventory* :detector)
+    ;; Если функции let удалось присвоить значение параметра, то вызывается фукнция идущая сразу же после let,
+    ;; иначе следующая функция
     (if-let [room (first (filter #((:items %) (keyword item))
                                  (vals rooms)))]
       (str item " is in " (:name room))
@@ -66,11 +69,11 @@
 
 ;; Command data
 
-(def commands {"move" move,
-               "north" (fn [] (move :north)),
-               "south" (fn [] (move :south)),
-               "east" (fn [] (move :east)),
-               "west" (fn [] (move :west)),
+(def commands {"move" move
+               "north" (fn [] (move :north))
+               "south" (fn [] (move :south))
+               "east" (fn [] (move :east))
+               "west" (fn [] (move :west))
                "grab" grab
                "discard" discard
                "inventory" inventory
@@ -85,4 +88,4 @@
   (let [input-words (re-split #"\s+" input)
         command (first input-words)
         args (rest input-words)]
-     (apply (commands command) args)))
+    (apply (commands command) args)))
