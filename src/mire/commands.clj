@@ -8,8 +8,15 @@
   []
   (str (:desc @*current-room*)
        "\nExits: " (keys @(:exits @*current-room*)) "\n"
-       (str-join "\n" (map #(str "There is " % " here.\n")
-                           @(:items @*current-room*)))))
+       ;; Создаёт строку на основе того, что генерирует
+       (str-join "\n"
+                ;; map для каждого элемента из сэта предметов current-room вызывает анонимную
+                 ;; функцию и формирует map из полученных значений.
+                 ;; Анонимную функцию заключают в #(). Параметром анонимной функции является параметр
+                 ;; строчки %, то есть результатом каждого вызова анонимной функции будет 
+                 ;; "There is <item> here." 
+                 (map #(str "There is " % " here.\n")
+                      @(:items @*current-room*)))))
 
 (defn move
   "\"♬ We gotta get out of this place... ♪\" Give a direction."
@@ -19,6 +26,7 @@
          target (rooms target-name)]
      (if target
        (do
+         ;; Перемещает игрока в комнату target
          (move-between-refs *player-name*
                             (:inhabitants @*current-room*)
                             (:inhabitants target))
@@ -30,13 +38,17 @@
   "Pick something up."
   [thing]
   (dosync
+   ;; В рамках транзакции, если комната содержит предмет, то помещаем его в инвентарь игрока
+   ;; с помощью функции move-between-refs
    (if (room-contains? @*current-room* thing)
      (do (move-between-refs (keyword thing)
                             (:items @*current-room*)
                             *inventory*)
+         ;; Вывод вещи, которую подобрал игрок
          (str "You picked up the " thing "."))
      (str "There isn't any " thing " here."))))
 
+;; То же самое что и grab, только возвращает предмет в список предметов комнаты
 (defn discard
   "Put something down that you're carrying."
   [thing]
@@ -48,6 +60,8 @@
          (str "You dropped the " thing "."))
      (str "You're not carrying a " thing "."))))
 
+
+;; Функция печатает инвентарь игрока
 (defn inventory
   "See what you've got."
   []

@@ -23,6 +23,8 @@ in it. Files should be maps containing room data."
   [dir]
   (def rooms (load-rooms dir)))
 
+;; Проверяет лежит ли предмет в комнате
+;; ? по соглашению используется для булевых функций
 (defn room-contains?
   [room thing]
   (@(:items room) (keyword thing)))

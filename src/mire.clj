@@ -18,7 +18,10 @@
     (print "\nWhat is your name? ") (flush)
     (binding [*player-name* (read-line)
               *current-room* (ref (rooms :start))
+              ;; Объявляем игроку инвентарь, являющийся сэтом
               *inventory* (ref #{})]
+      ;; Вызываем транзакционный ref-set (изменения значения по ссылке), 
+      ;; присваивая в посетителей комнаты нашего игрока
       (dosync (commute (:inhabitants @*current-room*) conj *player-name*))
 
       (println (look)) (print prompt) (flush)
