@@ -15,7 +15,7 @@
 
     ;; We have to nest this in another binding call instead of using
     ;; the one above so *in* and *out* will be bound to the socket
-    (print "\nWhat is your name? ") (flush)
+    (print "\n\rWhat is your name? ") (flush)
     (binding [player-name (read-line)
               *current-room* (ref (rooms :start))]
       (dosync (alter (:inhabitants @*current-room*) conj player-name))
@@ -28,5 +28,6 @@
         (flush)
         (recur (read-line))))))
 
+; загружаем комнаты
 (set-rooms "data/rooms")
 (def server (create-server port mire-handle-client))
