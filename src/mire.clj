@@ -10,6 +10,7 @@
 (defn- mire-handle-client [in out]
   (binding [*in* (reader in)
             *out* (writer out)
+            ;; Назначаем новому игроку стартовую комнату
             *current-room* (rooms :start)]
     (println (look))
     (print prompt) (flush)
