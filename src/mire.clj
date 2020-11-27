@@ -8,7 +8,7 @@
 
 (def port 3333)
 (def prompt "> ")
-
+;; Функция синхронно удаляет игрока из списка игроков комнаты и помещает его инвентарь в инвентарь комнаты
 (defn cleanup []
   "Drop all inventory and remove player from room and player list."
   (dosync
@@ -29,7 +29,8 @@
       (dosync (commute (:inhabitants @*current-room*) conj *player-name*))
 
       (println (look)) (print prompt) (flush)
-
+      
+      ;; Если происходит отключение игрока, то вызывается cleanup
       (try (loop [input (read-line)]
              (when input
                (println (execute input))

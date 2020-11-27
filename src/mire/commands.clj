@@ -82,6 +82,7 @@
 (defn execute
   "Execute a command that is passed to us."
   [input]
+  ;; Добавлена обработка ошибок, возникающих при наборе команды, которой нет в списке команд
   (try (let [input-words (re-split #"\s+" input)
              command (first input-words)
              args (rest input-words)]
