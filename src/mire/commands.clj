@@ -43,11 +43,17 @@
   "Pick something up."
   [thing]
   (dosync
-   (if (rooms/room-contains? @player/*current-room* thing)
-     (do (move-between-refs (keyword thing)
+    (if (rooms/room-contains? @player/*current-room* thing)
+      (if (= (compare thing "keys") 0)
+        ; (+ player/*keys-count* 1)
+        (do 
+          (swap! player/*keys-count* inc)
+          (str "You picked up the keys."))
+        (do 
+          (move-between-refs (keyword thing)
                             (:items @player/*current-room*)
                             player/*inventory*)
-         (str "You picked up the " thing "."))
+          (str "You picked up the " thing ".")))
      (str "There isn't any " thing " here."))))
 
 (defn discard
@@ -65,7 +71,8 @@
   "See what you've got."
   []
   (str "You are carrying:" eol
-       (str/join eol (seq @player/*inventory*))))
+       (str/join eol (seq @player/*inventory*))
+       "You have " @player/*keys-count* " keys."))
 
 (defn detect
   "If you have the detector, you can see which room an item is in."
