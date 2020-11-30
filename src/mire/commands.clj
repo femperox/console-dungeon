@@ -116,8 +116,7 @@
 (defn get-points
   "MORE POINTS!!!!!!!"
   []
-  (dosync
-    (commute player/scores assoc player/*name* (+ (@player/scores player/*name*) 25000)))
+  (player/add-points 25000)
   "MORE POINTS!!!!!!!")
 
 ;; Command data

@@ -21,10 +21,6 @@
         (recur (read-line)))
     name))
 
-(defn game-is-finished? 
-  []
-  (>= (count (filter #(>= % 50000) (vals @player/scores))) 1))
-
 (defn- mire-handle-client [in out]
   (binding [*in* (io/reader in)
             *out* (io/writer out)
@@ -51,7 +47,7 @@
             (.flush *err*)
             (print player/prompt) (flush)
 
-            (if (not (game-is-finished?))
+            (if (not @player/finished)
               (recur (read-line)))))
         (finally (cleanup)))
       (println "finished"))))
