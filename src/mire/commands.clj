@@ -19,7 +19,8 @@
   (str (:desc @player/*current-room*)
        eol "Exits: " (keys @(:exits @player/*current-room*)) eol
        (str/join eol (map #(str "There is " % " here." eol)
-                           @(:items @player/*current-room*)))))
+                           @(:items @player/*current-room*)))
+       "Players: " (str/join ", " @(:inhabitants @player/*current-room*)) "." eol))
 
 (defn move
   "\"♬ We gotta get out of this place... ♪\" Give a direction."
@@ -88,7 +89,7 @@
 (defn help
   "Show available commands and what they do."
   []
-  (str/join (System/getProperty "line.separator") (map #(str (key %) ": " (:doc (meta (val %))))
+  (str/join eol (map #(str (key %) ": " (:doc (meta (val %))))
                       (dissoc (ns-publics 'mire.commands)
                               'execute 'commands))))
 
