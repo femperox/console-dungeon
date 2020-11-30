@@ -3,8 +3,6 @@
             [mire.rooms :as rooms]
             [mire.player :as player]))
 
-(def eol (System/getProperty "line.separator"))
-
 (defn- move-between-refs
   "Move one instance of obj between from and to. Must call in a transaction."
   [obj from to]
@@ -17,12 +15,12 @@
   "Get a description of the surrounding environs and its contents."
   []
   (str (:desc @player/*current-room*)
-       eol "Exits: " (keys @(:exits @player/*current-room*)) eol
-       (str/join eol (map #(str "There is " % " here." eol)
+       player/eol "Exits: " (keys @(:exits @player/*current-room*)) player/eol
+       (str/join player/eol (map #(str "There is " % " here." player/eol)
                            @(:items @player/*current-room*)))
        (if (empty? (disj @(:inhabitants @player/*current-room*) player/*name*))
-          (str "You are alone in the room." eol)
-          (str "Players: " (str/join ", " (disj @(:inhabitants @player/*current-room*) player/*name*)) "." eol))))
+          (str "You are alone in the room." player/eol)
+          (str "Players: " (str/join ", " (disj @(:inhabitants @player/*current-room*) player/*name*)) "." player/eol))))
 
 (defn move
   "\"♬ We gotta get out of this place... ♪\" Give a direction."
@@ -77,8 +75,8 @@
 (defn inventory
   "See what you've got."
   []
-  (str "You are carrying:" eol
-       (str/join eol (seq @player/*inventory*))
+  (str "You are carrying:" player/eol
+       (str/join player/eol (seq @player/*inventory*))
        "You have " (.get player/*keys-count*) " keys."))
 
 (defn detect
@@ -105,9 +103,22 @@
 (defn help
   "Show available commands and what they do."
   []
-  (str/join eol (map #(str (key %) ": " (:doc (meta (val %))))
+  (str/join player/eol (map #(str (key %) ": " (:doc (meta (val %))))
                       (dissoc (ns-publics 'mire.commands)
                               'execute 'commands))))
+
+(defn score
+  "Show players score."
+  []
+  (str "Scoreboard" player/eol
+  (str/join player/eol (map #(str (key %) ": " (val %)) @player/scores))))
+
+(defn get-points
+  "MORE POINTS!!!!!!!"
+  []
+  (dosync
+    (commute player/scores assoc player/*name* (+ (@player/scores player/*name*) 25000)))
+  "MORE POINTS!!!!!!!")
 
 ;; Command data
 
@@ -122,7 +133,9 @@
                "detect" detect
                "look" look
                "say" say
-               "help" help})
+               "help" help
+               "score" score
+               "hesoyam" get-points})
 
 ;; Command handling
 

@@ -5,8 +5,6 @@
             [mire.commands :as commands]
             [mire.rooms :as rooms]))
           
-(def eol (System/getProperty "line.separator"))
-
 (defn- cleanup []
   "Drop all inventory and remove player from room and player list."
   (dosync
@@ -30,14 +28,15 @@
 
     ;; We have to nest this in another binding call instead of using
     ;; the one above so *in* and *out* will be bound to the socket
-    (print eol "What is your name? ") (flush)
+    (print player/eol "What is your name? ") (flush)
     (binding [player/*name* (get-unique-player-name (read-line))
               player/*current-room* (ref (@rooms/rooms :start))
               player/*inventory* (ref #{})]
       (dosync
-       (commute (:inhabitants @player/*current-room*) conj player/*name*)
-       (commute player/streams assoc player/*name* *out*)
-       (.set player/*keys-count* 0))
+        (commute (:inhabitants @player/*current-room*) conj player/*name*)
+        (commute player/streams assoc player/*name* *out*)
+        (.set player/*keys-count* 0)
+        (commute player/scores assoc player/*name* 0))
 
       (println (commands/look)) (print player/prompt) (flush)
 

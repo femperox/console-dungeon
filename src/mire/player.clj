@@ -4,10 +4,12 @@
 (def ^:dynamic *inventory*)
 (def ^:dynamic *name*)
 (def ^:dynamic *keys-count* (ThreadLocal.))
-(def ^:dynamic *score* 0)
 
 (def prompt "> ")
+(def eol (System/getProperty "line.separator"))
+
 (def streams (ref {}))
+(def scores (ref {}))
 
 (defn carrying? [thing]
   (some #{(keyword thing)} @*inventory*))
