@@ -34,6 +34,8 @@
       (dosync
        (set! *player-name* (get-unique-player-name (read-line)))
        (commute (:inhabitants @*current-room*) conj *player-name*)
+        ; Добоаляем выходной поток в мару потоков 
+        ; для отправки сообшения другим игрокам
        (commute player-streams assoc *player-name* *out*))
 
       (println (look)) (print prompt) (flush)

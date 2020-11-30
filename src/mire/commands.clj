@@ -75,10 +75,14 @@
   "Say something out loud so everyone in the room can hear."
   [& words]
   (let [message (join " " words)]
+    ; Для каждого игрока вкомнате делаем следуюшие
     (doseq [inhabitant (disj @(:inhabitants @*current-room*) *player-name*)]
+      ; получаем выходной поток
       (binding [*out* (player-streams inhabitant)]
+      ; отпраляес сообшение
         (println message)
         (println prompt)))
+    ; выводим то что оправили
     (str "You said " message)))
 
 (defn help
