@@ -20,7 +20,9 @@
        eol "Exits: " (keys @(:exits @player/*current-room*)) eol
        (str/join eol (map #(str "There is " % " here." eol)
                            @(:items @player/*current-room*)))
-       "Players: " (str/join ", " (disj @(:inhabitants @player/*current-room*) player/*name*)) "." eol))
+       (if (empty? (disj @(:inhabitants @player/*current-room*) player/*name*))
+          (str "You are alone in the room." eol)
+          (str "Players: " (str/join ", " (disj @(:inhabitants @player/*current-room*) player/*name*)) "." eol))))
 
 (defn move
   "\"♬ We gotta get out of this place... ♪\" Give a direction."
