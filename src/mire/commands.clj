@@ -3,6 +3,8 @@
             [mire.rooms :as rooms]
             [mire.player :as player]))
 
+(def eol (System/getProperty "line.separator"))
+
 (defn- move-between-refs
   "Move one instance of obj between from and to. Must call in a transaction."
   [obj from to]
@@ -15,8 +17,8 @@
   "Get a description of the surrounding environs and its contents."
   []
   (str (:desc @player/*current-room*)
-       "\nExits: " (keys @(:exits @player/*current-room*)) "\n"
-       (str/join "\n" (map #(str "There is " % " here.\n")
+       eol "Exits: " (keys @(:exits @player/*current-room*)) eol
+       (str/join eol (map #(str "There is " % " here." eol)
                            @(:items @player/*current-room*)))))
 
 (defn move
@@ -59,8 +61,8 @@
 (defn inventory
   "See what you've got."
   []
-  (str "You are carrying:\n"
-       (str/join "\n" (seq @player/*inventory*))))
+  (str "You are carrying:" eol
+       (str/join eol (seq @player/*inventory*))))
 
 (defn detect
   "If you have the detector, you can see which room an item is in."
@@ -86,7 +88,7 @@
 (defn help
   "Show available commands and what they do."
   []
-  (str/join "\n" (map #(str (key %) ": " (:doc (meta (val %))))
+  (str/join (System/getProperty "line.separator") (map #(str (key %) ": " (:doc (meta (val %))))
                       (dissoc (ns-publics 'mire.commands)
                               'execute 'commands))))
 
