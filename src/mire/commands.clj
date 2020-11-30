@@ -124,10 +124,8 @@
   "Attack other player"
   [target]
   (dosync
-    (if (contains? @player/health target)
-      (do
-        (commute player/health assoc target (- (@player/health target) player/attack-value))
-        "Attack was successful.")
+    (if (player/attack target player/attack-value)
+      "Attack was successful."
       "Target don't exist.")))
 
 ;; Command data

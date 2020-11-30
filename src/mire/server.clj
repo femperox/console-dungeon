@@ -48,6 +48,13 @@
             (.flush *err*)
             (print player/prompt) (flush)
 
+            (if (<= (@player/health player/*name*) 0)
+              (do
+                (println "You died. Respawn in 5 sec.") (flush)
+                (Thread/sleep 5000)
+                (println "You are ready to go.") (flush)
+                (player/set-health-value player/*name* player/max-health)))
+
             (if (not @player/finished)
               (recur (read-line)))))
         (finally (cleanup)))
