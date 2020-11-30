@@ -5,6 +5,10 @@
 (def ^:dynamic *inventory*)
 (def ^:dynamic *name*)
 (def ^:dynamic *keys-count* (ThreadLocal.))
+(def health (ref {}))
+(def max-health 100)
+(def attack-value 25)
+(def scores (ref {}))
 
 ; Constants
 (def prompt "> ")
@@ -13,15 +17,16 @@
 (def finished (atom false))
 
 (def streams (ref {}))
-(def scores (ref {}))
 
 (defn carrying? [thing]
   (some #{(keyword thing)} @*inventory*))
 
 (defn game-is-finished? [_]
+  "Check if game is finished"
   (>= (count (filter #(>= % target-score) (vals @scores))) 1))
 
 (defn add-points [points]
+  "Add points to current player"
   (dosync
     (commute scores assoc *name* (+ (@scores *name*) points))
     (swap! finished game-is-finished?)))

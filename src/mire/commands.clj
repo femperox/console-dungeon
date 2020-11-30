@@ -77,7 +77,8 @@
   []
   (str "You are carrying:" player/eol
        (str/join player/eol (seq @player/*inventory*))
-       "You have " (.get player/*keys-count*) " keys."))
+       "You have " (.get player/*keys-count*) " keys." player/eol
+       "You health: " (@player/health player/*name*) "."))
 
 (defn detect
   "If you have the detector, you can see which room an item is in."
@@ -119,6 +120,16 @@
   (player/add-points 25000)
   "MORE POINTS!!!!!!!")
 
+(defn attack 
+  "Attack other player"
+  [target]
+  (dosync
+    (if (contains? @player/health target)
+      (do
+        (commute player/health assoc target (- (@player/health target) player/attack-value))
+        "Attack was successful.")
+      "Target don't exist.")))
+
 ;; Command data
 
 (def commands {"move" move,
@@ -134,7 +145,8 @@
                "say" say
                "help" help
                "score" score
-               "hesoyam" get-points})
+               "hesoyam" get-points
+               "attack" attack})
 
 ;; Command handling
 
