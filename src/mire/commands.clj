@@ -45,10 +45,10 @@
   (dosync
     (if (rooms/room-contains? @player/*current-room* thing)
       (if (= (compare thing "keys") 0)
-        ; (+ player/*keys-count* 1)
         (do 
-          (swap! player/*keys-count* inc)
-          (str "You picked up the keys."))
+          (.set player/*keys-count* (inc (.get player/*keys-count*)))
+          (alter (:items @player/*current-room*) disj :keys)
+          "You picked up keys.")
         (do 
           (move-between-refs (keyword thing)
                             (:items @player/*current-room*)
@@ -60,19 +60,26 @@
   "Put something down that you're carrying."
   [thing]
   (dosync
-   (if (player/carrying? thing)
-     (do (move-between-refs (keyword thing)
+    (if (= (compare thing "keys") 0)
+      (do 
+        (.set player/*keys-count* (dec (.get player/*keys-count*)))
+        (alter (:items @player/*current-room*) conj :keys)
+        "You dropped keys.")
+      (do 
+        (if (player/carrying? thing)
+          (do 
+            (move-between-refs (keyword thing)
                             player/*inventory*
                             (:items @player/*current-room*))
-         (str "You dropped the " thing "."))
-     (str "You're not carrying a " thing "."))))
+            (str "You dropped the " thing "."))
+          (str "You're not carrying a " thing "."))))))
 
 (defn inventory
   "See what you've got."
   []
   (str "You are carrying:" eol
        (str/join eol (seq @player/*inventory*))
-       "You have " @player/*keys-count* " keys."))
+       "You have " (.get player/*keys-count*) " keys."))
 
 (defn detect
   "If you have the detector, you can see which room an item is in."
