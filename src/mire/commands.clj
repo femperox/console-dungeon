@@ -126,8 +126,14 @@
   (dosync
     (case (player/attack target player/attack-value)
       2 (str "You killed " target ".")
-      1 (str "You attacked " target ".")
-      0 "Target don't exist.")))
+      1 (do 
+          (binding [*out* (player/streams target)]
+            (println)
+            (println (str "You was attacked by " player/*name* "."))
+            (println (str "You hp is " (@player/health target) "."))
+            (print player/prompt) (flush))
+          (str "You attacked " target "."))
+      0 (str target " isn't here."))))
 
 ;; Command data
 
