@@ -33,13 +33,17 @@
 
 (defn attack [target value]
   "Deal damage to player.
-   Return true if was successful and false if not."
+   Return 0 target don't exist
+          1 damage was done
+          2 targat died."
   (dosync
     (if (contains? @health target)
       (do
         (commute health assoc target (- (@health target) value))
-        true)
-      false)))
+        (if (<= (@health target) 0)
+          2
+          1))
+      0)))
 
 (defn set-health-value [target value]
   "Set players health value.

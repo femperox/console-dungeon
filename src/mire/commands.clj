@@ -124,9 +124,10 @@
   "Attack other player"
   [target]
   (dosync
-    (if (player/attack target player/attack-value)
-      "Attack was successful."
-      "Target don't exist.")))
+    (case (player/attack target player/attack-value)
+      2 (str "You killed " target ".")
+      1 (str "You attacked " target ".")
+      0 "Target don't exist.")))
 
 ;; Command data
 
