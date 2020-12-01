@@ -5,8 +5,6 @@
             [mire.commands :as commands]
             [mire.rooms :as rooms]))
           
-(def eol (System/getProperty "line.separator"))
-
 (defn- cleanup []
   "Drop all inventory and remove player from room and player list."
   (dosync
@@ -30,23 +28,37 @@
 
     ;; We have to nest this in another binding call instead of using
     ;; the one above so *in* and *out* will be bound to the socket
-    (print eol "What is your name? ") (flush)
+    (print player/eol "What is your name? ") (flush)
     (binding [player/*name* (get-unique-player-name (read-line))
               player/*current-room* (ref (@rooms/rooms :start))
               player/*inventory* (ref #{})]
       (dosync
-       (commute (:inhabitants @player/*current-room*) conj player/*name*)
-       (commute player/streams assoc player/*name* *out*))
+        (commute (:inhabitants @player/*current-room*) conj player/*name*)
+        (commute player/streams assoc player/*name* *out*)
+        (.set player/*keys-count* 0)
+        (commute player/scores assoc player/*name* 0)
+        (commute player/health assoc player/*name* player/max-health))
 
       (println (commands/look)) (print player/prompt) (flush)
 
-      (try (loop [input (read-line)]
-             (when input
-               (println (commands/execute input))
-               (.flush *err*)
-               (print player/prompt) (flush)
-               (recur (read-line))))
-           (finally (cleanup))))))
+      (try 
+        (loop [input (read-line)]
+          (when input
+
+            (if (> (player/get-health) 0)
+              (do 
+                (println (commands/execute input))
+                (.flush *err*))
+              (println "You are dead!"))
+            (print player/prompt) (flush)
+
+            (if (not @player/finished)
+              (recur (read-line)))))
+        (finally (cleanup)))
+      (println)
+      (println "Game is fihished!")
+      (println)
+      (println (commands/score)))))
 
 (defn -main
   ([port dir]
