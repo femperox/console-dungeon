@@ -55,7 +55,10 @@
             (if (not @player/finished)
               (recur (read-line)))))
         (finally (cleanup)))
-      (println "finished"))))
+      (println)
+      (println "Game is fihished!")
+      (println)
+      (println (commands/score)))))
 
 (defn -main
   ([port dir]

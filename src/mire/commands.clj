@@ -35,7 +35,7 @@
                             (:inhabitants target))
          (ref-set player/*current-room* target)
          (look))
-       "You can't go that way."))))
+       (str "You can't go that way." player/eol)))))
 
 (defn grab
   "Pick something up."
@@ -46,13 +46,13 @@
         (do 
           (.set player/*keys-count* (inc (.get player/*keys-count*)))
           (alter (:items @player/*current-room*) disj :keys)
-          "You picked up keys.")
+          (str "You picked up keys." player/eol))
         (do 
           (move-between-refs (keyword thing)
                             (:items @player/*current-room*)
                             player/*inventory*)
-          (str "You picked up the " thing ".")))
-     (str "There isn't any " thing " here."))))
+          (str "You picked up the " thing "." player/eol)))
+     (str "There isn't any " thing " here." player/eol))))
 
 (defn discard
   "Put something down that you're carrying."
@@ -62,15 +62,15 @@
       (do 
         (.set player/*keys-count* (dec (.get player/*keys-count*)))
         (alter (:items @player/*current-room*) conj :keys)
-        "You dropped keys.")
+        (str "You dropped keys." player/eol))
       (do 
         (if (player/carrying? thing)
           (do 
             (move-between-refs (keyword thing)
                             player/*inventory*
                             (:items @player/*current-room*))
-            (str "You dropped the " thing "."))
-          (str "You're not carrying a " thing "."))))))
+            (str "You dropped the " thing "." player/eol))
+          (str "You're not carrying a " thing "." player/eol))))))
 
 (defn inventory
   "See what you've got."
@@ -78,7 +78,7 @@
   (str "You are carrying:" player/eol
        (str/join player/eol (seq @player/*inventory*))
        "You have " (.get player/*keys-count*) " keys." player/eol
-       "You health: " (@player/health player/*name*) "."))
+       "You health: " (@player/health player/*name*) "." player/eol))
 
 (defn detect
   "If you have the detector, you can see which room an item is in."
@@ -87,8 +87,8 @@
     (if-let [room (first (filter #((:items %) (keyword item))
                                  (vals @rooms/rooms)))]
       (str item " is in " (:name room))
-      (str item " is not in any room."))
-    "You need to be carrying the detector for that."))
+      (str item " is not in any room." player/eol))
+    (str "You need to be carrying the detector for that." player/eol)))
 
 (defn say
   "Say something out loud so everyone in the room can hear."
@@ -98,42 +98,45 @@
                              player/*name*)]
       (binding [*out* (player/streams inhabitant)]
         (println message)
+        (println)
         (println player/prompt)))
-    (str "You said " message)))
+    (str "You said " message player/eol)))
 
 (defn help
   "Show available commands and what they do."
   []
+  (str
   (str/join player/eol (map #(str (key %) ": " (:doc (meta (val %))))
                       (dissoc (ns-publics 'mire.commands)
-                              'execute 'commands))))
+                              'execute 'commands))) player/eol))
 
 (defn score
   "Show players score."
   []
   (str "Scoreboard" player/eol
-  (str/join player/eol (map #(str (key %) ": " (val %)) @player/scores))))
+  (str/join player/eol (map #(str (key %) ": " (val %)) (reverse (sort-by #(val %) @player/scores)))) player/eol))
 
 (defn get-points
   "MORE POINTS!!!!!!!"
   []
   (player/add-points 25000)
-  "MORE POINTS!!!!!!!")
+  (str "MORE POINTS!!!!!!!" player/eol))
 
 (defn attack 
   "Attack other player"
   [target]
   (dosync
     (case (player/attack target player/attack-value)
-      2 (str "You killed " target ".")
+      2 (str "You killed " target "." player/eol)
       1 (do 
           (binding [*out* (player/streams target)]
             (println)
             (println (str "You was attacked by " player/*name* "."))
             (println (str "You hp is " (@player/health target) "."))
+            (println)
             (print player/prompt) (flush))
-          (str "You attacked " target "."))
-      0 (str target " isn't here."))))
+          (str "You attacked " target "." player/eol))
+      0 (str target " isn't here." player/eol))))
 
 ;; Command data
 

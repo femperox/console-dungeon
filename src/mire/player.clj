@@ -69,6 +69,7 @@
         (if (<= (@health target) 0)
           (do
             (kill-player-for target 10 *current-room*)
+            (add-points 5000)
             2)
           1))
       0)))
