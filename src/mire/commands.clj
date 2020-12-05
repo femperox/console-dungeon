@@ -19,10 +19,8 @@
        (str/join player/eol (map #(str "There is " % " here." player/eol)
                            @(:items @player/*current-room*)))
        (if (empty? (disj @(:inhabitants @player/*current-room*) player/*name*))
-      ;  (if (empty? (remove #(= player/*name* %) @(:inhabitants @player/*current-room*)))
           (str "You are alone in the room." player/eol)
           (str "Players: " (str/join ", " (disj @(:inhabitants @player/*current-room*) player/*name*)) "." player/eol))))
-          ; (str "Players: " (str/join ", " (remove #(= player/*name* %) @(:inhabitants @player/*current-room*))) "." player/eol))))
 
 (defn move
   "\"♬ We gotta get out of this place... ♪\" Give a direction."
@@ -128,7 +126,7 @@
   "Attack other player"
   [target-number]
   (if-let [target (nth (vec (disj @(:inhabitants @player/*current-room*) player/*name*)) (Integer/parseInt target-number))]
-    (case (player/attack target player/attack-value)
+    (case (player/attack target)
       2 (str "You killed " target "." player/eol)
       1 (do 
           (binding [*out* (player/streams target)]
@@ -137,7 +135,9 @@
             (println (str "You hp is " (@player/health target) "."))
             (println)
             (print player/prompt) (flush))
-          (str "You attacked " target "." player/eol))
+          (str "You attacked " target "." player/eol 
+            target " counterattack." player/eol
+            "You hp is " (@player/health player/*name*) "." player/eol))
       0 (str target " isn't here." player/eol))
     (str "There is not " target-number "th player here")))
 
@@ -164,8 +164,9 @@
 (defn execute
   "Execute a command that is passed to us."
   [input]
-  (try (let [[command & args] (.split input " +")]
-         (apply (commands command) args))
-       (catch Exception e
-         (.printStackTrace e (new java.io.PrintWriter *err*))
-         "You can't do that!")))
+  (try 
+    (let [[command & args] (.split input " +")]
+      (apply (commands command) args))
+    (catch Exception e
+      (.printStackTrace e (new java.io.PrintWriter *err*))
+      "You can't do that!")))

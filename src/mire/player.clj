@@ -1,14 +1,30 @@
 (ns mire.player)
 
 ;Player staff
+; комната в которой находися игрок
 (def ^:dynamic *current-room*)
+; инветраь игрока
 (def ^:dynamic *inventory*)
+; имя игрока
 (def ^:dynamic *name*)
+; колличество ключей
 (def ^:dynamic *keys-count* (ThreadLocal.))
+; мапа с хп всех игроков
 (def health (ref {}))
-(def max-health 100)
-(def attack-value 25)
+; мапа с атаками всех игроков
+(def attack-values (ref {}))
+; мапа с очками игроков
 (def scores (ref {}))
+
+; константы игрока
+; константа с максимальным хп
+(def max-health 100)
+; занчение базовой атаки
+(def base-attack-value 25)
+; время возрождения игрока
+(def respawn-time 10)
+; очки за убийства игрока
+(def points-for-kill 5000)
 
 ; Constants
 (def prompt "> ")
@@ -57,7 +73,7 @@
       (println "You are ready to go.")
       (print prompt)(flush))))))
 
-(defn attack [target value]
+(defn attack [target]
   "Deal damage to player.
    Return 0 target don't exist
           1 damage was done
@@ -65,13 +81,17 @@
   (dosync
     (if (contains? @health target)
       (do
-        (commute health assoc target (- (@health target) value))
+        (commute health assoc target (- (@health target) (@attack-values *name*)))
         (if (<= (@health target) 0)
           (do
             (kill-player-for target 10 *current-room*)
-            (add-points 5000)
+            (add-points points-for-kill)
             2)
-          1))
+          (do
+            (commute health assoc *name* (- (@health *name*) (@attack-values target)))
+            (if (<= (@health *name* ) 0)
+              (kill-player-for *name* respawn-time *current-room*))
+            1)))
       0)))
 
 (defn get-health []

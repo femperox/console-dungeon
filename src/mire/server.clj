@@ -37,7 +37,8 @@
         (commute player/streams assoc player/*name* *out*)
         (.set player/*keys-count* 0)
         (commute player/scores assoc player/*name* 0)
-        (commute player/health assoc player/*name* player/max-health))
+        (commute player/health assoc player/*name* player/max-health)
+        (commute player/attack-values assoc player/*name* player/base-attack-value))
 
       (println (commands/look)) (print player/prompt) (flush)
 
