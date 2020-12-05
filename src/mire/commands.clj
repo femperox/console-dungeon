@@ -19,8 +19,10 @@
        (str/join player/eol (map #(str "There is " % " here." player/eol)
                            @(:items @player/*current-room*)))
        (if (empty? (disj @(:inhabitants @player/*current-room*) player/*name*))
+      ;  (if (empty? (remove #(= player/*name* %) @(:inhabitants @player/*current-room*)))
           (str "You are alone in the room." player/eol)
           (str "Players: " (str/join ", " (disj @(:inhabitants @player/*current-room*) player/*name*)) "." player/eol))))
+          ; (str "Players: " (str/join ", " (remove #(= player/*name* %) @(:inhabitants @player/*current-room*))) "." player/eol))))
 
 (defn move
   "\"♬ We gotta get out of this place... ♪\" Give a direction."
@@ -124,8 +126,8 @@
 
 (defn attack 
   "Attack other player"
-  [target]
-  (dosync
+  [target-number]
+  (if-let [target (nth (vec (disj @(:inhabitants @player/*current-room*) player/*name*)) (Integer/parseInt target-number))]
     (case (player/attack target player/attack-value)
       2 (str "You killed " target "." player/eol)
       1 (do 
@@ -136,7 +138,8 @@
             (println)
             (print player/prompt) (flush))
           (str "You attacked " target "." player/eol))
-      0 (str target " isn't here." player/eol))))
+      0 (str target " isn't here." player/eol))
+    (str "There is not " target-number "th player here")))
 
 ;; Command data
 
