@@ -57,7 +57,7 @@
               (recur (read-line)))))
         (finally (cleanup)))
       (println)
-      (println "Game is fihished!")
+      (println "Game is finished!")
       (println)
       (println (commands/score)))))
 
@@ -65,6 +65,6 @@
   ([port dir]
      (rooms/add-rooms dir)
      (defonce server (socket/create-server (Integer. port) mire-handle-client))
-     (println "Launching Mire server on port" port))
+     (println "Launching Console Dungeon server on port" port))
   ([port] (-main port "resources/rooms"))
   ([] (-main 3333)))
