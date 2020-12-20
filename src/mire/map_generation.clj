@@ -8,9 +8,6 @@
     (loop [lv 1
           cr cur-room
           pr nil]
-          
-          ;  (println cr)
-          ;  (println lv)
             (do 
 
                 (commute cr assoc :room-name (apply str ["room " lv])) 
@@ -18,17 +15,10 @@
                 (commute (:exits @cr) assoc :next (ref {}))
                 (commute (:exits @cr) assoc :prev pr)
                 (println lv)
-                (println cr)
-              ; (if (= lv 1)
-              ;   ; (do
-              ;   ;   (commute (:exits @cr) assoc :next (ref {}))
-              ;   ;   (commute (:next @(:exits @cr)) assoc :prev cr))
-              ;   (commute (:exits @cr) assoc :prev nil)
-              ; )
                   (if (< lv lvl)
                     (do
                       (println "we are here")
-                      (recur (+ lv 1) (:next @(:exits @cr)) (cr))
+                      (recur (+ lv 1) (:next @(:exits @cr)) cr)
                     )
                     (commute (:exits @cr) assoc :next nil)
                   )
@@ -46,11 +36,20 @@
       (println (:room-name @r))
       (if (not= (:next @(:exits @r)) nil)
         (recur (:next @(:exits @r)))
+        (def final r)
+      )
+    )
+  )
+  (println)
+  (loop [r final]
+    (do
+      (println (:room-name @r))
+      (if (not= (:prev @(:exits @r))) nil
+        (recur (:prev @(:exits @r)))
       )
     )
   )
 )
 
-(gen-lvl room_struct 3)
-; (through room_struct)
-;; assoc для добавления новой пары ключ-значение
+(gen-lvl room_struct 5) ; создание двунаправленного списка 
+(through room_struct) ; просмотр в одну сторону
