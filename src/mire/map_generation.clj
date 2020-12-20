@@ -49,20 +49,16 @@
   )
 )
 
-
-(defn pick-rand
-  [vect]
-  (vect (rand-int (count vect))))
-
-
 (defn get-n-rand-from-set [n set]
   (loop [iter n
-        rand-n-set set] 
-    (let [rand-value (rand-int (count rand-n-set))]
+        rand-n-set #{}
+        old-set set] 
+    (let [rand-value (rand-int (count old-set))]
       (if (> iter 0)
         (recur
           (- iter 1)
-          (disj rand-n-set (nth (vec rand-n-set) rand-value))
+          (conj rand-n-set (nth (vec old-set) rand-value))
+          (disj old-set (nth (vec old-set) rand-value))
         )
         rand-n-set
       )
