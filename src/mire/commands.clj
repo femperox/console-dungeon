@@ -59,10 +59,12 @@
   [thing]
   (dosync
     (if (= (compare thing "keys") 0)
-      (do 
-        (.set player/*keys-count* (dec (.get player/*keys-count*)))
-        (alter (:items @player/*current-room*) conj :keys)
-        (str "You dropped keys." player/eol))
+      (if (> (.get player/*keys-count*) 0)  
+        (do
+          (.set player/*keys-count* (dec (.get player/*keys-count*)))
+          (alter (:items @player/*current-room*) conj :keys)
+          (str "You dropped keys." player/eol))
+        "You dont have any keys.")
       (do 
         (if (player/carrying? thing)
           (do 
