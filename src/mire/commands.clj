@@ -42,44 +42,100 @@
   [thing]
   (dosync
     (if (rooms/room-contains? @player/*current-room* thing)
-      (if (= (compare thing "keys") 0)
-        (do 
+      (case thing
+        "keys" (do
           (.set player/*keys-count* (inc (.get player/*keys-count*)))
           (alter (:items @player/*current-room*) disj :keys)
           (str "You picked up keys." player/eol))
-        (do 
+        "banana" (do
+          (commute player/health assoc player/*name* (+ (@player/health player/*name*) 10))
+          (alter (:items @player/*current-room*) disj :banana)
+          (str "Banana was so good..." player/eol))
+        "apple" (do
+          (commute player/health assoc player/*name* (+ (@player/health player/*name*) 8))
+          (alter (:items @player/*current-room*) disj :apple)
+          (str "Mmm... tasty..." player/eol))
+        "kiwi" (do
+          (commute player/health assoc player/*name* (+ (@player/health player/*name*) 5))
+          (alter (:items @player/*current-room*) disj :kiwi)
+          (str "Urgh! Sour, but OK..." player/eol))
+        "sword" (do
+          (commute player/attack-values assoc player/*name* (+ (@player/attack-values player/*name*) 20))
+          (move-between-refs (keyword thing) (:items @player/*current-room*) player/*inventory*)
+          (alter (:items @player/*current-room*) disj :sword)
+          (str "I am a warrior!" player/eol))
+        "bow" (do
+          (commute player/attack-values assoc player/*name* (+ (@player/attack-values player/*name*) 10))
+          (move-between-refs (keyword thing) (:items @player/*current-room*) player/*inventory*)
+          (alter (:items @player/*current-room*) disj :bow)
+          (str "I am a archer!" player/eol))
+        "axe" (do
+          (commute player/attack-values assoc player/*name* (+ (@player/attack-values player/*name*) 15))
+          (move-between-refs (keyword thing) (:items @player/*current-room*) player/*inventory*)
+          (alter (:items @player/*current-room*) disj :axe)
+          (str "I am a barbarian!" player/eol))
+        "gold" (do
+          (player/add-points 5000)
+          (alter (:items @player/*current-room*) disj :gold)
+          (str "Some gold, nice." player/eol))
+        "ruby" (do
+          (player/add-points 10000)
+          (alter (:items @player/*current-room*) disj :ruby)
+          (str "Ruby, hah." player/eol))
+        "emerald" (do
+          (player/add-points 15000)
+          (alter (:items @player/*current-room*) disj :emerald)
+          (str "It's so green, wow." player/eol))
+        "diamond" (do
+          (player/add-points 20000)
+          (alter (:items @player/*current-room*) disj :diamond)
+          (str "Jackpot, yeah!" player/eol))
+        ;"death" (commute player/health assoc player/*name* (- (@player/health player/*name*) 100))
+        (do
           (move-between-refs (keyword thing)
-                            (:items @player/*current-room*)
-                            player/*inventory*)
-          (str "You picked up the " thing "." player/eol)))
+            (:items @player/*current-room*)
+            player/*inventory*)
+            (str "You picked up the " thing "." player/eol)))
      (str "There isn't any " thing " here." player/eol))))
 
 (defn discard
-  "Put something down that you're carrying."
+  "Put down that you're carrying."
   [thing]
   (dosync
-    (if (= (compare thing "keys") 0)
-      (if (> (.get player/*keys-count*) 0)  
+    (if (player/carrying? thing)
+    (case thing
+      "keys" (if (> (.get player/*keys-count*) 0)
         (do
           (.set player/*keys-count* (dec (.get player/*keys-count*)))
           (alter (:items @player/*current-room*) conj :keys)
           (str "You dropped keys." player/eol))
-        "You dont have any keys.")
-      (do 
-        (if (player/carrying? thing)
-          (do 
-            (move-between-refs (keyword thing)
-                            player/*inventory*
-                            (:items @player/*current-room*))
-            (str "You dropped the " thing "." player/eol))
-          (str "You're not carrying a " thing "." player/eol))))))
+        "You don't have any keys.")
+      "sword" (do
+        (commute player/attack-values assoc player/*name* (- (@player/attack-values player/*name*) 20))
+        (move-between-refs (keyword thing) player/*inventory* (:items @player/*current-room*))
+        (alter (:items @player/*current-room*) conj :sword)
+        (str "You dropped the " thing "." player/eol))
+      "bow" (do
+        (commute player/attack-values assoc player/*name* (- (@player/attack-values player/*name*) 10))
+        (move-between-refs (keyword thing) player/*inventory* (:items @player/*current-room*))
+        (alter (:items @player/*current-room*) conj :bow)
+        (str "You dropped the " thing "." player/eol))
+      "axe" (do
+        (commute player/attack-values assoc player/*name* (- (@player/attack-values player/*name*) 15))
+        (move-between-refs (keyword thing) player/*inventory* (:items @player/*current-room*))
+        (alter (:items @player/*current-room*) conj :axe)
+        (str "You dropped the " thing "." player/eol))
+      (do
+        (move-between-refs (keyword thing) player/*inventory* (:items @player/*current-room*))
+        (str "You dropped the " thing "." player/eol)))
+    (str "You're not carrying a " thing "." player/eol))))
 
 (defn inventory
   "See what you've got."
   []
   (str "You are carrying:" player/eol
        (str/join player/eol (seq @player/*inventory*))
-       "You have " (.get player/*keys-count*) " keys." player/eol))
+       "\nYou have " (.get player/*keys-count*) " keys." player/eol))
 
 (defn detect
   "If you have the detector, you can see which room an item is in."
@@ -123,20 +179,20 @@
   (player/add-points 25000)
   (str "MORE POINTS!!!!!!!" player/eol))
 
-(defn attack 
+(defn attack
   "Attack other player"
   [target-number]
   (if-let [target (nth (vec (disj @(:inhabitants @player/*current-room*) player/*name*)) (Integer/parseInt target-number))]
     (case (player/attack target)
       2 (str "You killed " target "." player/eol)
-      1 (do 
+      1 (do
           (binding [*out* (player/streams target)]
             (println)
             (println (str "You was attacked by " player/*name* "."))
             (println (str "You hp is " (@player/health target) "."))
             (println)
             (print player/prompt) (flush))
-          (str "You attacked " target "." player/eol 
+          (str "You attacked " target "." player/eol
             target " counterattack." player/eol
             "You hp is " (@player/health player/*name*) "." player/eol))
       0 (str target " isn't here." player/eol))
@@ -145,9 +201,10 @@
 (defn status
   "Player status"
   []
-  (str 
-    "You health: " (@player/health player/*name*) "." player/eol
-    "You score: " (@player/scores player/*name*) "." player/eol))
+  (str
+    "Your health: " (@player/health player/*name*) "." player/eol
+    "Your score: " (@player/scores player/*name*) "." player/eol
+    "Your damage: " (@player/attack-values player/*name*) "." player/eol))
 
 ;; Command data
 
@@ -173,7 +230,7 @@
 (defn execute
   "Execute a command that is passed to us."
   [input]
-  (try 
+  (try
     (let [[command & args] (.split input " +")]
       (apply (commands command) args))
     (catch Exception e
