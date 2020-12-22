@@ -3,7 +3,8 @@
             [server.socket :as socket]
             [mire.player :as player]
             [mire.commands :as commands]
-            [mire.rooms :as rooms]))
+            [mire.rooms :as rooms]
+  ))
           
 (defn- cleanup []
   "Drop all inventory and remove player from room and player list."
@@ -30,7 +31,7 @@
     ;; the one above so *in* and *out* will be bound to the socket
     (print player/eol "What is your name? ") (flush)
     (binding [player/*name* (get-unique-player-name (read-line))
-              player/*current-room* (ref (@rooms/rooms :start))
+              player/*current-room* @rooms/rooms
               player/*inventory* (ref #{})]
       (dosync
         (commute (:inhabitants @player/*current-room*) conj player/*name*)
@@ -62,8 +63,8 @@
       (println (commands/score)))))
 
 (defn -main
-  ([port dir]
-     (rooms/add-rooms dir)
+  (  [port dir]
+     (rooms/add-rooms)
      (defonce server (socket/create-server (Integer. port) mire-handle-client))
      (println "Launching Console Dungeon server on port" port))
   ([port] (-main port "resources/rooms"))

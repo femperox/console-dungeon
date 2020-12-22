@@ -71,7 +71,6 @@
       (do
         (commute room assoc :access "locked")
         (def secrets (+ sec_count 1))  
-        (println "locked")
       )
     )
   )
