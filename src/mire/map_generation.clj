@@ -1,5 +1,7 @@
 (ns mire.map_generation)
 
+(def game_items (ref #{:mat :sin :doch}))
+
 (def rooms_graf_head (ref {}))
 
 (def secrets 0)
@@ -76,12 +78,9 @@
   )
 )
 
-; {:name (keyword (.getName file))
-;             :desc (:desc room)
-;             :exits (ref (:exits room))
-;             :items (ref (or (:items room) #{}))
-;             :inhabitants (ref #{})}
-
+(defn gen_items [items_count]
+  (get_n_rand_from_set items_count @game_items)
+)
 
 (defn gen_graph [current_room direction_from_arrived prev_room lvl]
   "Принимает ссылку на мапу; 
@@ -96,6 +95,9 @@
     (commute current_room assoc :access "open")
     (commute current_room assoc :items (ref #{}))
     (commute current_room assoc :inhabitants (ref #{}))
+    (doseq [item (gen_items (+ (rand-int 3) 1))] 
+      (alter (:items @current_room) conj item)  
+    )
     (commute current_room assoc :name (str "room " lvl "-" (rand-int 1000)))
     (if (not (nil? direction_from_arrived))
       (commute (:exits @current_room) assoc (opposite_way direction_from_arrived) (ref prev_room))
@@ -150,8 +152,3 @@
     (print_room graph name_from)
   )
 )
-
-; Тест
-; создаём граф и выводим его на экран
-; (gen_graph rooms_graf_head nil nil 4)
-; (see_graph rooms_graf_head nil nil)
