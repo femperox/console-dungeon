@@ -1,4 +1,4 @@
-(ns map_generation)
+(ns mire.map_generation)
 
 (def rooms_graf_head (ref {}))
 
@@ -83,6 +83,7 @@
 ;             :items (ref (or (:items room) #{}))
 ;             :inhabitants (ref #{})}
 
+
 (defn gen_graph [current_room direction_from_arrived prev_room lvl]
   "Принимает ссылку на мапу; 
    сторону света, откуда пришли в комнату;
@@ -98,20 +99,29 @@
     (commute current_room assoc :inhabitants (ref #{}))
     (commute current_room assoc :name (str "room " lvl "-" (rand-int 1000)))
     (if (not (nil? direction_from_arrived))
-      (commute (:exits @current_room) assoc (opposite_way direction_from_arrived) prev_room)
+      (commute (:exits @current_room) assoc (opposite_way direction_from_arrived) (ref prev_room))
     )
-    (if (> (- lvl 1) 0) 
-      (doseq [direction (gen_sides direction_from_arrived)]
-        (commute (:exits @current_room) assoc direction (ref {}))
-        (gen_graph 
-          (direction @(:exits @current_room))
-          direction
-          current_room
-          (- lvl 1)
+    (if (> (- lvl 1) 0)
+      (do
+        (doseq [direction (gen_sides direction_from_arrived)]
+          (commute (:exits @current_room) assoc direction (ref {}))
+          (gen_graph 
+            (direction @(:exits @current_room))
+            direction
+            @current_room
+            (- lvl 1)
+          )
         )
       ) 
       (gen_secret current_room secrets)
     )
+  )
+)
+
+(defn gen_rooms [levels_count]
+  (let [rooms (ref {})]
+    (gen_graph rooms nil nil levels_count)
+    rooms
   )
 )
 
@@ -144,5 +154,5 @@
 
 ; Тест
 ; создаём граф и выводим его на экран
-(gen_graph rooms_graf_head nil nil 4)
-(see_graph rooms_graf_head nil nil)
+; (gen_graph rooms_graf_head nil nil 4)
+; (see_graph rooms_graf_head nil nil)
