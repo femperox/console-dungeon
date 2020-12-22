@@ -2,6 +2,8 @@
 
 (def rooms_graf_head (ref {}))
 
+(def secrets 0)
+
 (defn gen_lvl [cur_room lvl]
   "Создание комнаты на lvl-ном уровне графа"
   (try
@@ -61,6 +63,26 @@
   (keyword (way {:north "south" :east "west" :south "north" :west "east"}))  
 )
 
+
+(defn gen_secret [room sec_count]
+  "Создаёт запертую комнату и меняет ключи"
+  (dosync
+    (if (>= (rand-int 101) 50) 
+      (do
+        (commute room assoc :access "locked")
+        (def secrets (+ sec_count 1))  
+        (println "locked")
+      )
+    )
+  )
+)
+
+; {:name (keyword (.getName file))
+;             :desc (:desc room)
+;             :exits (ref (:exits room))
+;             :items (ref (or (:items room) #{}))
+;             :inhabitants (ref #{})}
+
 (defn gen_graph [current_room direction_from_arrived prev_room lvl]
   "Принимает ссылку на мапу; 
    сторону света, откуда пришли в комнату;
@@ -70,12 +92,16 @@
    Переданная вначале ссылка будет указателем на структуру"
   (dosync
     (commute current_room assoc :exits (ref {}))
+    (commute current_room assoc :desc "")
+    (commute current_room assoc :access "open")
+    (commute current_room assoc :items (ref #{}))
+    (commute current_room assoc :inhabitants (ref #{}))
     (commute current_room assoc :name (str "room " lvl "-" (rand-int 1000)))
     (if (not (nil? direction_from_arrived))
       (commute (:exits @current_room) assoc (opposite_way direction_from_arrived) prev_room)
     )
     (if (> (- lvl 1) 0) 
-       (doseq [direction (gen_sides direction_from_arrived)]
+      (doseq [direction (gen_sides direction_from_arrived)]
         (commute (:exits @current_room) assoc direction (ref {}))
         (gen_graph 
           (direction @(:exits @current_room))
@@ -84,6 +110,7 @@
           (- lvl 1)
         )
       ) 
+      (gen_secret current_room secrets)
     )
   )
 )
