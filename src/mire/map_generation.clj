@@ -1,6 +1,6 @@
 (ns mire.map_generation)
 
-(def game_items (ref #{:mat :sin :doch}))
+(def game_items (ref #{:wood-sword :wood-armor :ruby :emerald :diamond :banana :apple :kiwi}))
 
 (def rooms_graf_head (ref {}))
 
