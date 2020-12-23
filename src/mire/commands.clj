@@ -263,21 +263,9 @@
 (defn status
   "Player status"
   []
-<<<<<<< HEAD
   (str 
     "You health: " (@player/health player/*name*) "." player/eol
     "You score: " (@player/scores player/*name*) "." player/eol))
-	
-	
-
-
-	
-=======
-  (str
-    "Your health: " (@player/health player/*name*) "." player/eol
-    "Your score: " (@player/scores player/*name*) "." player/eol
-    "Your damage: " (@player/attack-values player/*name*) "." player/eol))
->>>>>>> new-items
 
 ;; Command data
 
