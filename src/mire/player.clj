@@ -1,4 +1,4 @@
-(ns mire.player)
+  (ns mire.player)
 
 ;Player staff
 ; комната в которой находися игрок
@@ -73,6 +73,36 @@
       (println "You are ready to go.")
       (print prompt)(flush))))))
 
+;;======
+; Высчитывание количества граней кубика в зависимости от количества hp
+(defn calc-sides
+	[hp]
+	(cond 
+	(< hp 20) 4
+	(< hp 50) 5
+	:else 6
+	)
+)
+
+;; Бросание кубика с количество сторон "sides"
+(defn roll-dice
+	[sides]
+	(inc (rand-int sides)))
+
+;; Вычисление урона бросанием кубиков
+(defn crit-damage
+	[base-damage sides]
+	(let [rd (roll-dice sides)]
+	(cond 
+		(= rd sides) (int (* base-damage 1.5))
+		(> rd (/ sides 2)) base-damage
+		(<= rd (/ sides 2)) (int (/ base-damage 1.5))
+		)
+	
+	)
+)
+;;======
+
 (defn attack [target]
   "Deal damage to player.
    Return 0 target don't exist
@@ -81,14 +111,14 @@
   (dosync
     (if (contains? @health target)
       (do
-        (commute health assoc target (- (@health target) (@attack-values *name*)))
+        (commute health assoc target (- (@health target) (crit-damage (@attack-values *name*) (calc-sides (@health *name*)))))
         (if (<= (@health target) 0)
           (do
             (kill-player-for target 10 *current-room*)
             (add-points points-for-kill)
             2)
           (do
-            (commute health assoc *name* (- (@health *name*) (@attack-values target)))
+            (commute health assoc *name* (- (@health *name*) (crit-damage (@attack-values target) (calc-sides (@health target)))))
             (if (<= (@health *name* ) 0)
               (kill-player-for *name* respawn-time *current-room*))
             1)))
@@ -97,4 +127,3 @@
 (defn get-health []
   "Get health value of current player"
   (@health *name*))
-
