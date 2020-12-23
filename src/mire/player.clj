@@ -56,7 +56,9 @@
       (and 
         (not= (.get *courier-available*) -1)
         (>= (@scores *name*) (/ target-score 2)))
-      (.set *courier-available* 1))
+      (do 
+        (.set *courier-available* 1))
+        (println "You can use courier"))
     (swap! finished game-is-finished?)))
 
 (defn set-health-value [target value]
