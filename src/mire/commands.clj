@@ -77,8 +77,8 @@
 (defn inventory
   "See what you've got."
   []
-  (str "You are carrying:" player/eol
-       (str/join player/eol (seq @player/*inventory*))
+  (str "You are carrying: "
+       (str/join player/eol (seq @player/*inventory*)) player/eol
        "You have " (.get player/*keys-count*) " keys." player/eol))
 
 (defn detect
@@ -166,7 +166,9 @@
                "score" score
                "hesoyam" get-points
                "attack" attack
-               "status" status})
+               "status" status
+               "activate-courier" player/activate-courier
+               "get-existing-items" player/get-existing-items})
 
 ;; Command handling
 
