@@ -90,7 +90,7 @@
           (player/add-points 20000)
           (alter (:items @player/*current-room*) disj :diamond)
           (str "Jackpot, yeah!" player/eol))
-        ;"death" (commute player/health assoc player/*name* (- (@player/health player/*name*) 100))
+        "death" (commute player/health assoc player/*name* (- (@player/health player/*name*) 80))
         (do
           (move-between-refs (keyword thing)
             (:items @player/*current-room*)
@@ -136,6 +136,18 @@
   (str "You are carrying:" player/eol
        (str/join player/eol (seq @player/*inventory*))
        "\nYou have " (.get player/*keys-count*) " keys." player/eol))
+
+(defn heal []
+  "If you have the firstAidKit, you can heal yourself."
+    (if (player/carrying? :firstAidKit)
+    (do
+      (str "asdf" "asdf")
+      (player/set-health-value player/*name* (+ player/health 50))
+      ; (player/overhealed?)
+      ; (alter (:items player/*inventory*) disj :firstAidKit)
+      (str "What a relief!")
+    )
+    (str "You need a firstAidKit for that." player/eol)))
 
 (defn detect
   "If you have the detector, you can see which room an item is in."
@@ -223,7 +235,8 @@
                "score" score
                "hesoyam" get-points
                "attack" attack
-               "status" status})
+               "status" status
+               "heal" heal})
 
 ;; Command handling
 

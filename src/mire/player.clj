@@ -57,6 +57,11 @@
         true)
       false)))
 
+(defn overhealed? []
+  "Check if player's health is over max-health"
+  ((if (> health max-health)
+    (set-health-value *name* max-health))))
+
 (defn kill-player-for [target time room]
   "Remove player from room for 'time' seconds
    then restore all health and return to the same room"
@@ -97,4 +102,3 @@
 (defn get-health []
   "Get health value of current player"
   (@health *name*))
-
