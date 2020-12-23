@@ -60,6 +60,12 @@
         true)
       false)))
 
+(defn overhealed []
+  "Check if player's health is over max-health"
+  (dosync
+    (if (> (@health *name*) max-health)
+      (set-health-value *name* 100))))
+
 (defn kill-player-for [target time room]
   "Remove player from room for 'time' seconds
    then restore all health and return to the same room"
