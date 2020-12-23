@@ -139,15 +139,14 @@
 
 (defn heal []
   "If you have the firstAidKit, you can heal yourself."
+  (dosync
     (if (player/carrying? :firstAidKit)
     (do
-      (str "asdf" "asdf")
-      (player/set-health-value player/*name* (+ player/health 50))
-      ; (player/overhealed?)
-      ; (alter (:items player/*inventory*) disj :firstAidKit)
-      (str "What a relief!")
-    )
-    (str "You need a firstAidKit for that." player/eol)))
+      (player/set-health-value player/*name* (+ (@player/health player/*name*) 50))
+      (alter player/*inventory* disj :firstAidKit)
+      (player/overhealed)
+      (str "What a relief!"))
+    (str "You need a firstAidKit for that." player/eol))))
 
 (defn detect
   "If you have the detector, you can see which room an item is in."
@@ -228,6 +227,7 @@
                "grab" grab
                "discard" discard
                "inventory" inventory
+               "heal" heal
                "detect" detect
                "look" look
                "say" say
@@ -235,8 +235,7 @@
                "score" score
                "hesoyam" get-points
                "attack" attack
-               "status" status
-               "heal" heal})
+               "status" status})
 
 ;; Command handling
 
