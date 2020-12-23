@@ -1,5 +1,6 @@
 (ns mire.player)
 
+
 (def existing-items (ref #{}))
 
 ;Player staff
@@ -53,7 +54,8 @@
       (and 
         (not= (.get *courier-available*) -1)
         (>= (@scores *name*) (/ target-score 2)))
-      (.set *courier-available* 1))
+      (do (.set *courier-available* 1)
+      (println "Now you can use a courier"))
     (swap! finished game-is-finished?)))
 
 (defn set-health-value [target value]
@@ -117,9 +119,9 @@
      0 (print "You can't use courier cause you don't have enough points" eol)
      1 (if (@existing-items (keyword item))
          (do
-           (alter *inventory* conj item)
+           (alter (:items @player/*current-room*) conj item)
            (.set *courier-available* -1)
-           (print "Item has been added to your inventory" eol)
+           (print "Item has been delivered to this room" eol)
          )
          (print "This item doesn't exists" eol))
     )
