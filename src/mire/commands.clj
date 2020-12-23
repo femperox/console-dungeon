@@ -287,12 +287,9 @@
                "hesoyam" get-points
                "attack" attack
                "status" status
-<<<<<<< HEAD
-			   "check-set" check-set})
-=======
+			         "check-set" check-set
                "activate-courier" player/activate-courier
                "get-existing-items" player/get-existing-items})
->>>>>>> courier
 
 ;; Command handling
 

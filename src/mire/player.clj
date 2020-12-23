@@ -145,8 +145,7 @@
 (defn get-health []
   "Get health value of current player"
   (@health *name*))
-<<<<<<< HEAD
-=======
+
   
 (defn get-existing-items []
   (print @existing-items))
@@ -167,4 +166,3 @@
   )
 )
 
->>>>>>> courier
