@@ -199,6 +199,7 @@
       (str "What a relief!"))
     (str "You need a firstAidKit for that." player/eol))))
 
+
 (defn detect
   "If you have the detector, you can see which room an item is in."
   [item]
@@ -286,7 +287,12 @@
                "hesoyam" get-points
                "attack" attack
                "status" status
+<<<<<<< HEAD
 			   "check-set" check-set})
+=======
+               "activate-courier" player/activate-courier
+               "get-existing-items" player/get-existing-items})
+>>>>>>> courier
 
 ;; Command handling
 

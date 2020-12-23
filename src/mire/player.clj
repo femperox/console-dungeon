@@ -1,5 +1,7 @@
   (ns mire.player)
 
+(def existing-items (ref #{}))
+
 ;Player staff
 ; комната в которой находися игрок
 (def ^:dynamic *current-room*)
@@ -15,6 +17,8 @@
 (def attack-values (ref {}))
 ; мапа с очками игроков
 (def scores (ref {}))
+; возможность вызвать курьера
+(def ^:dynamic *courier-available* (ThreadLocal.))
 
 ; учёт собранных сетов
 (def ^:dynamic *sets*)
@@ -48,6 +52,11 @@
   "Add points to current player"
   (dosync
     (commute scores assoc *name* (+ (@scores *name*) points))
+    (if 
+      (and 
+        (not= (.get *courier-available*) -1)
+        (>= (@scores *name*) (/ target-score 2)))
+      (.set *courier-available* 1))
     (swap! finished game-is-finished?)))
 
 (defn set-health-value [target value]
@@ -74,7 +83,7 @@
       (dosync
         (alter (:inhabitants @room) disj target))
       (println)
-      (println (str "You was killed. Respawn in " time " sec."))
+      (println (str "You were killed. Respawn in " time " sec."))
       (Thread/sleep (* time 1000))
       (set-health-value target max-health)
       (dosync
@@ -136,3 +145,26 @@
 (defn get-health []
   "Get health value of current player"
   (@health *name*))
+<<<<<<< HEAD
+=======
+  
+(defn get-existing-items []
+  (print @existing-items))
+  
+(defn activate-courier [item]
+  (dosync
+    (case (.get *courier-available*)
+    -1 (print "You have already used a courier!" eol)
+     0 (print "You can't use courier cause you don't have enough points" eol)
+     1 (if (@existing-items (keyword item))
+         (do
+           (alter *inventory* conj item)
+           (.set *courier-available* -1)
+           (print "Item has been added to your inventory" eol)
+         )
+         (print "This item doesn't exists" eol))
+    )
+  )
+)
+
+>>>>>>> courier
