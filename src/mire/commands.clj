@@ -39,6 +39,54 @@
          (look))
        (str "You can't go that way." player/eol)))))
 
+(defn check-set
+  "check status of the item set!"
+  [item]
+  (dosync   
+	
+   (cond
+   (or (= (player/carrying? item) :wood-sword) (= (player/carrying? item) :wood-armor))
+         (do (if (and (@player/*inventory* :wood-sword ) (@player/*inventory* :wood-armor ) )
+		      (if (not (@player/*sets* :wood ))
+					(do 
+						(alter player/*sets* conj :wood)
+						(player/add-points 200)
+						(str "That's full wood set! +200 points" player/eol )
+					)
+					(str "That's full wood set!"))
+              (str "One more thing to go in wood set!" player/eol )))
+	
+	(or (= (player/carrying? item) :banana) (= (player/carrying? item) :kiwi) (= (player/carrying? item) :apple))
+			(do (if (and (@player/*inventory* :banana) (@player/*inventory* :kiwi ) (@player/*inventory* :apple))
+				(if (not (@player/*sets* :fruit ))
+					(do 
+						(alter player/*sets* conj :fruit)
+						(commute player/health assoc player/*name* (+ (@player/health player/*name*) 15))
+						(str "That's full fruit set! +15 health points" player/eol )
+					)
+					(str "That's full fruit set!"))
+				
+              (str "There are 3 items in fruit set! Find them all!" player/eol )))
+    (or (= (player/carrying? item) :ruby) (= (player/carrying? item) :emerald) (= (player/carrying? item) :diamond))
+			(do (if (and (@player/*inventory* :ruby) (@player/*inventory* :emerald ) (@player/*inventory* :diamond))
+				(if (not (@player/*sets* :philosophers-stone ))
+					(do 
+						(alter player/*sets* conj :philosophers-stone)
+						(player/add-points 50000)
+						(str "That's full philosophers' stone! +50000 points!!!! YOU WIN!!!!" player/eol )
+					)
+					(str "That's full philosophers' stone!"))
+				
+              (str "Find 3 stones... and you'll become more powerfull!" player/eol )))
+	:else (str "sorry... there is no set for this item :(" player/eol )
+	
+   )
+  ))	   
+	   
+	   
+	   
+	   
+	   
 (defn grab
   "Pick something up."
   [thing]
@@ -53,6 +101,7 @@
           (move-between-refs (keyword thing)
                             (:items @player/*current-room*)
                             player/*inventory*)
+		  (print (check-set thing))					
           (str "You picked up the " thing "." player/eol)))
      (str "There isn't any " thing " here." player/eol))))
 
@@ -150,6 +199,11 @@
   (str 
     "You health: " (@player/health player/*name*) "." player/eol
     "You score: " (@player/scores player/*name*) "." player/eol))
+	
+	
+
+
+	
 
 ;; Command data
 
@@ -168,7 +222,8 @@
                "score" score
                "hesoyam" get-points
                "attack" attack
-               "status" status})
+               "status" status
+			   "check-set" check-set})
 
 ;; Command handling
 
@@ -181,3 +236,4 @@
     (catch Exception e
       (.printStackTrace e (new java.io.PrintWriter *err*))
       "You can't do that!")))
+
